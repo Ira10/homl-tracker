@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HoML 60-Day Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --surface3: #252525;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #e8e6df;
+    --text2: #8a8880;
+    --text3: #555350;
+    --green: #3dd68c;
+    --green-bg: rgba(61,214,140,0.1);
+    --red: #f87171;
+    --red-bg: rgba(248,113,113,0.1);
+    --blue: #60a5fa;
+    --blue-bg: rgba(96,165,250,0.1);
+    --amber: #fbbf24;
+    --amber-bg: rgba(251,191,36,0.1);
+    --accent: #3dd68c;
+    --font-display: 'Syne', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-display);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .container { max-width: 820px; margin: 0 auto; }
+
+  .top-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-block h1 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .logo-block p {
+    font-size: 0.78rem;
+    color: var(--text3);
+    font-family: var(--font-mono);
+    margin-top: 3px;
+  }
+
+  .deadline-badge {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 6px 12px;
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    color: var(--text2);
+    text-align: right;
+  }
+
+  .deadline-badge span {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--amber);
+    margin-top: 2px;
+  }
+
+  /* Stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 1.75rem;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+  }
+
+  .stat-card .label {
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+
+  .stat-card .value {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .stat-card .sub {
+    font-size: 0.7rem;
+    color: var(--text3);
+    font-family: var(--font-mono);
+    margin-top: 4px;
+  }
+
+  /* Overall progress */
+  .progress-section { margin-bottom: 1.75rem; }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .progress-header span {
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .progress-header strong {
+    font-size: 0.78rem;
+    font-family: var(--font-mono);
+    color: var(--green);
+  }
+
+  .progress-track {
+    height: 4px;
+    background: var(--surface3);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 4px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* Part headers */
+  .part-header {
+    font-size: 0.65rem;
+    font-family: var(--font-mono);
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.5rem 0 0.5rem;
+    margin-top: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 6px;
+  }
+
+  /* Chapter rows */
+  .chapter-list { display: flex; flex-direction: column; gap: 4px; }
+
+  .chapter-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+
+  .chapter-row:hover { border-color: var(--border2); }
+  .chapter-row.expanded { border-color: var(--border2); }
+
+  .chapter-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .ch-num {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--text3);
+    min-width: 34px;
+  }
+
+  .ch-title {
+    font-size: 0.85rem;
+    color: var(--text);
+    flex: 1;
+    font-weight: 500;
+  }
+
+  .late-days {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--red);
+  }
+
+  .ch-due {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text3);
+    min-width: 60px;
+    text-align: right;
+  }
+
+  .status-badge {
+    font-size: 0.65rem;
+    font-family: var(--font-mono);
+    padding: 3px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .s-done { background: var(--green-bg); color: var(--green); }
+  .s-late { background: var(--red-bg); color: var(--red); }
+  .s-active { background: var(--blue-bg); color: var(--blue); }
+  .s-upcoming { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+
+  .ch-bar {
+    height: 2px;
+    margin: 0 14px 0;
+    background: var(--surface3);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0;
+  }
+
+  .ch-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+
+  /* Expanded detail */
+  .ch-detail {
+    display: none;
+    padding: 14px 14px 14px;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .chapter-row.expanded .ch-bar { margin-bottom: 0; }
+  .chapter-row.expanded .ch-detail { display: block; }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field.full { grid-column: 1 / -1; }
+
+  .field label {
+    font-size: 0.68rem;
+    font-family: var(--font-mono);
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .field input[type="date"],
+  .field input[type="text"],
+  .field select,
+  .field textarea {
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 10px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    outline: none;
+    transition: border-color 0.15s;
+    resize: vertical;
+  }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: var(--border2);
+  }
+
+  .field textarea { min-height: 60px; }
+
+  .field select option { background: var(--surface3); }
+
+  .slider-row { display: flex; align-items: center; gap: 10px; }
+
+  .field input[type="range"] {
+    flex: 1;
+    background: transparent;
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 4px;
+    background: var(--surface3);
+    border: none;
+    padding: 0;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .field input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--green);
+    cursor: pointer;
+  }
+
+  .slider-val {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--green);
+    min-width: 34px;
+    text-align: right;
+  }
+
+  .detail-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
+  }
+
+  .detail-hint {
+    font-size: 0.68rem;
+    font-family: var(--font-mono);
+    color: var(--text3);
+  }
+
+  .btn-save {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: 7px 18px;
+    background: var(--green-bg);
+    color: var(--green);
+    border: 1px solid rgba(61,214,140,0.25);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .btn-save:hover { background: rgba(61,214,140,0.18); }
+
+  .saved-flash {
+    font-size: 0.68rem;
+    font-family: var(--font-mono);
+    color: var(--green);
+    opacity: 0;
+    transition: opacity 0.3s;
+    margin-right: 10px;
+  }
+
+  .saved-flash.show { opacity: 1; }
+
+  /* Footer */
+  .footer {
+    margin-top: 2.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    color: var(--text3);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  @media (max-width: 600px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .detail-grid { grid-template-columns: 1fr; }
+    .field.full { grid-column: 1; }
+    .top-header { flex-direction: column; gap: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="top-header">
+    <div class="logo-block">
+      <h1>HoML 60-Day Tracker</h1>
+      <p>Hands-On ML · Scikit-Learn, Keras & TensorFlow</p>
+    </div>
+    <div class="deadline-badge">
+      Target deadline
+      <span id="deadline-date"></span>
+    </div>
+  </div>
+
+  <div class="stats-grid" id="stats"></div>
+
+  <div class="progress-section">
+    <div class="progress-header">
+      <span>Overall progress</span>
+      <strong id="pct-label">0%</strong>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="main-bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="chapter-list" id="chlist"></div>
+
+  <div class="footer">
+    <span>Data saved in browser localStorage</span>
+    <span id="last-saved"></span>
+  </div>
+</div>
+
+<script>
+const START = new Date('2026-03-25');
+const TOTAL_DAYS = 60;
+
+const CHAPTERS = [
+  { id:1,  part:1, title:'The machine learning landscape',      days:2, topics:'Supervised/unsupervised, reinforcement, batch vs online learning', outcome:'Mind map of ML types' },
+  { id:2,  part:1, title:'End-to-end ML project',               days:5, topics:'Pipeline, EDA, feature engineering, model selection, fine-tuning', outcome:'Housing prices project (Kaggle-style)' },
+  { id:3,  part:1, title:'Classification',                      days:3, topics:'Precision, recall, F1, ROC, confusion matrix, multiclass', outcome:'MNIST classifier' },
+  { id:4,  part:1, title:'Training models',                     days:4, topics:'Linear/polynomial regression, gradient descent, regularization (L1/L2)', outcome:'Regression from scratch notebook' },
+  { id:5,  part:1, title:'Support vector machines',             days:2, topics:'SVM, kernels, soft/hard margin, SVR', outcome:'SVM on a real dataset' },
+  { id:6,  part:1, title:'Decision trees',                      days:2, topics:'CART algorithm, Gini impurity, info gain, pruning', outcome:'Decision tree classifier + visualization' },
+  { id:7,  part:1, title:'Ensemble learning & random forests',  days:3, topics:'Bagging, boosting, stacking, random forests, XGBoost', outcome:'Ensemble comparison notebook' },
+  { id:8,  part:1, title:'Dimensionality reduction',            days:3, topics:'PCA, kernel PCA, LLE, t-SNE, UMAP', outcome:'Visualize high-dim data in 2D' },
+  { id:9,  part:1, title:'Unsupervised learning',               days:3, topics:'k-means, DBSCAN, Gaussian mixtures, anomaly detection', outcome:'Customer segmentation case study' },
+  { id:10, part:2, title:'Intro to ANNs with Keras',            days:3, topics:'Perceptron, MLP, backpropagation, Keras Sequential API', outcome:'Digit classifier with Keras' },
+  { id:11, part:2, title:'Training deep neural networks',       days:4, topics:'Vanishing gradients, batch norm, dropout, Adam/SGD optimizers', outcome:'Deep net with training best practices' },
+  { id:12, part:2, title:'Custom models & training with TF',    days:3, topics:'TF lower-level API, custom layers, custom training loops', outcome:'Custom training loop from scratch' },
+  { id:13, part:2, title:'Loading & preprocessing data',        days:2, topics:'tf.data API, data pipelines, TFRecord format', outcome:'Efficient ML data pipeline' },
+  { id:14, part:2, title:'Deep computer vision — CNNs',         days:4, topics:'Conv layers, pooling, LeNet, ResNet, transfer learning', outcome:'Image classifier with pretrained ResNet' },
+  { id:15, part:2, title:'Processing sequences — RNNs & CNNs',  days:4, topics:'RNN, LSTM, GRU, 1D convolutions, WaveNet', outcome:'Time-series forecasting model' },
+  { id:16, part:2, title:'NLP with RNNs & attention',           days:4, topics:'Word embeddings, encoder-decoder, attention mechanism, Transformers intro', outcome:'Sentiment analysis model' },
+  { id:17, part:2, title:'Autoencoders & GANs',                 days:3, topics:'Autoencoders, variational AE (VAE), GANs, DCGAN', outcome:'Image generation demo' },
+  { id:18, part:2, title:'Diffusion models',                    days:2, topics:'DDPM, score matching, denoising process', outcome:'Paper summary + study notes' },
+  { id:19, part:2, title:'Reinforcement learning',              days:3, topics:'MDP, policy gradient, Q-learning, DQN', outcome:'CartPole with OpenAI Gym' },
+  { id:20, part:2, title:'Training at scale with TF',           days:2, topics:'Distribution strategies, TF Serving, TFLite, deployment', outcome:'Model deployment mini demo' },
+];
+
+// Pre-compute due dates
+let cum = 0;
+const chapters = CHAPTERS.map(c => {
+  cum += c.days;
+  const due = new Date(START);
+  due.setDate(due.getDate() + cum - 1);
+  return { ...c, due };
+});
+
+// Deadline
+const deadline = new Date(START);
+deadline.setDate(deadline.getDate() + TOTAL_DAYS - 1);
+document.getElementById('deadline-date').textContent = deadline.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+
+// Storage
+function load() { try { return JSON.parse(localStorage.getItem('homl_tracker_v1') || '{}'); } catch { return {}; } }
+function save(d) {
+  try {
+    localStorage.setItem('homl_tracker_v1', JSON.stringify(d));
+    const now = new Date();
+    document.getElementById('last-saved').textContent = 'Last saved: ' + now.toLocaleTimeString();
+  } catch(e) { alert('Could not save: ' + e.message); }
+}
+
+let data = load();
+let expanded = null;
+
+function getStatus(ch) {
+  const d = data[ch.id] || {};
+  if (d.statusOverride) return d.statusOverride;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const due = new Date(ch.due); due.setHours(0,0,0,0);
+  const start = new Date(START); start.setDate(start.getDate() + (chapters.indexOf(ch) > 0 ? chapters[chapters.indexOf(ch)-1].due - START : 0));
+  if (today > due) return 'late';
+  if (today >= new Date(START)) return 'active';
+  return 'upcoming';
+}
+
+function statusInfo(s) {
+  return {
+    done:     { label:'Done',        cls:'s-done',     bar:'#3dd68c' },
+    late:     { label:'Late',        cls:'s-late',     bar:'#f87171' },
+    active:   { label:'In progress', cls:'s-active',   bar:'#60a5fa' },
+    upcoming: { label:'Upcoming',    cls:'s-upcoming', bar:'#333' },
+  }[s];
+}
+
+function diffDays(a, b) { return Math.round((a - b) / 86400000); }
+
+function renderStats() {
+  const done = chapters.filter(c => (data[c.id]||{}).statusOverride === 'done').length;
+  const late = chapters.filter(c => getStatus(c) === 'late').length;
+  const today = new Date();
+  const elapsed = Math.max(0, Math.min(TOTAL_DAYS, diffDays(today, START)));
+  const pct = Math.round((done / chapters.length) * 100);
+
+  document.getElementById('stats').innerHTML = `
+    <div class="stat-card">
+      <div class="label">Chapters done</div>
+      <div class="value">${done}<span style="font-size:1rem;color:var(--text3)">/${chapters.length}</span></div>
+      <div class="sub">of 20 total</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Days elapsed</div>
+      <div class="value">${elapsed}<span style="font-size:1rem;color:var(--text3)">/${TOTAL_DAYS}</span></div>
+      <div class="sub">${TOTAL_DAYS - elapsed} days left</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Chapters late</div>
+      <div class="value" style="color:${late > 0 ? 'var(--red)' : 'var(--text)'}">${late}</div>
+      <div class="sub">${late === 0 ? 'on track!' : 'need catch-up'}</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Completion</div>
+      <div class="value" style="color:var(--green)">${pct}%</div>
+      <div class="sub">${chapters.length - done} remaining</div>
+    </div>
+  `;
+
+  document.getElementById('main-bar').style.width = pct + '%';
+  document.getElementById('pct-label').textContent = pct + '%';
+}
+
+function renderList() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  let html = '';
+  let lastPart = null;
+
+  chapters.forEach(ch => {
+    const d = data[ch.id] || {};
+    const s = getStatus(ch);
+    const info = statusInfo(s);
+    const progress = d.progress || (s === 'done' ? 100 : 0);
+    const lateBy = s === 'late' ? diffDays(today, ch.due) : 0;
+    const isExp = expanded === ch.id;
+
+    if (ch.part !== lastPart) {
+      lastPart = ch.part;
+      const partNames = { 1:'Part I — The fundamentals of ML', 2:'Part II — Neural networks & deep learning' };
+      html += `<div class="part-header">${partNames[ch.part]}</div>`;
+    }
+
+    html += `
+    <div class="chapter-row ${isExp ? 'expanded' : ''}" data-id="${ch.id}">
+      <div class="chapter-top">
+        <span class="ch-num">Ch ${String(ch.id).padStart(2,'0')}</span>
+        <span class="ch-title">${ch.title}</span>
+        ${lateBy > 0 ? `<span class="late-days">+${lateBy}d</span>` : ''}
+        <span class="ch-due">${ch.due.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>
+        <span class="status-badge ${info.cls}">${info.label}</span>
+      </div>
+      <div class="ch-bar">
+        <div class="ch-bar-fill" style="width:${progress}%;background:${info.bar}"></div>
+      </div>
+      <div class="ch-detail">
+        <div class="detail-grid">
+          <div class="field">
+            <label>Estimated due</label>
+            <input type="text" value="${ch.due.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}" readonly style="color:var(--text3);cursor:default">
+          </div>
+          <div class="field">
+            <label>Actual finish date</label>
+            <input type="date" id="fin-${ch.id}" value="${d.finDate || ''}">
+          </div>
+          <div class="field full">
+            <label>Progress — <span id="progval-${ch.id}">${progress}%</span></label>
+            <div class="slider-row">
+              <input type="range" min="0" max="100" step="5" id="prog-${ch.id}" value="${progress}">
+            </div>
+          </div>
+          <div class="field">
+            <label>Status override</label>
+            <select id="stat-${ch.id}">
+              <option value="">Auto-detect</option>
+              <option value="upcoming" ${d.statusOverride==='upcoming'?'selected':''}>Upcoming</option>
+              <option value="active"   ${d.statusOverride==='active'  ?'selected':''}>In progress</option>
+              <option value="done"     ${d.statusOverride==='done'    ?'selected':''}>Done</option>
+              <option value="late"     ${d.statusOverride==='late'    ?'selected':''}>Late</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Days late / early (auto)</label>
+            <input type="text" readonly value="${d.finDate ? (diffDays(new Date(d.finDate), ch.due) > 0 ? '+' + diffDays(new Date(d.finDate), ch.due) + ' days late' : diffDays(new Date(d.finDate), ch.due) === 0 ? 'On time' : Math.abs(diffDays(new Date(d.finDate), ch.due)) + ' days early') : '—'}" style="color:var(--text3);cursor:default">
+          </div>
+          <div class="field full">
+            <label>Topics covered (from reading)</label>
+            <textarea id="notes-${ch.id}" placeholder="${ch.topics}">${d.notes || ''}</textarea>
+          </div>
+          <div class="field full">
+            <label>Outcome — project / library / case study</label>
+            <textarea id="outcome-${ch.id}" placeholder="${ch.outcome}">${d.outcome || ''}</textarea>
+          </div>
+          <div class="field full">
+            <label>Key insights / what finally clicked</label>
+            <textarea id="insight-${ch.id}" placeholder="e.g. Finally understood why gradients vanish in deep nets...">${d.insight || ''}</textarea>
+          </div>
+        </div>
+        <div class="detail-footer">
+          <span class="saved-flash" id="flash-${ch.id}">Saved!</span>
+          <button class="btn-save" onclick="saveChapter(${ch.id})">Save entry</button>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('chlist').innerHTML = html;
+
+  // Wire up sliders + click handlers
+  chapters.forEach(ch => {
+    const slider = document.getElementById(`prog-${ch.id}`);
+    const val = document.getElementById(`progval-${ch.id}`);
+    if (slider && val) {
+      slider.addEventListener('input', () => { val.textContent = slider.value + '%'; });
+    }
+  });
+
+  document.querySelectorAll('.chapter-top').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = parseInt(el.closest('.chapter-row').dataset.id);
+      expanded = expanded === id ? null : id;
+      renderList();
+      if (expanded === id) {
+        setTimeout(() => {
+          el.closest('.chapter-row').scrollIntoView({ behavior:'smooth', block:'nearest' });
+        }, 50);
+      }
+    });
+  });
+}
+
+window.saveChapter = function(id) {
+  const stat = document.getElementById(`stat-${id}`).value;
+  data[id] = {
+    finDate:        document.getElementById(`fin-${id}`).value,
+    progress:       parseInt(document.getElementById(`prog-${id}`).value),
+    notes:          document.getElementById(`notes-${id}`).value,
+    outcome:        document.getElementById(`outcome-${id}`).value,
+    insight:        document.getElementById(`insight-${id}`).value,
+    statusOverride: stat || null,
+  };
+  save(data);
+
+  const flash = document.getElementById(`flash-${id}`);
+  if (flash) { flash.classList.add('show'); setTimeout(() => flash.classList.remove('show'), 1500); }
+
+  renderStats();
+  // Re-render only the bar/status of this row without collapsing
+  const row = document.querySelector(`[data-id="${id}"]`);
+  if (row) {
+    const s = getStatus(chapters.find(c => c.id === id));
+    const info = statusInfo(s);
+    const bar = row.querySelector('.ch-bar-fill');
+    const badge = row.querySelector('.status-badge');
+    const prog = data[id].progress || (s === 'done' ? 100 : 0);
+    if (bar) { bar.style.width = prog + '%'; bar.style.background = info.bar; }
+    if (badge) { badge.textContent = info.label; badge.className = 'status-badge ' + info.cls; }
+  }
+};
+
+// Init
+renderStats();
+renderList();
+</script>
+</body>
+</html>

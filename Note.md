@@ -22,3 +22,7 @@
 **28th June**
 
 1. Indrani would show Anjali the old website Chatgpt made for her, around 10 pm.
+
+**29th June**
+
+1. Indrani has shared the old website with Anjali.
